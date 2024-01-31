@@ -1,0 +1,33 @@
+create table airplane
+(reg_no int ,model varchar(25),manufacturer varchar(25),status varchar(25)
+,primary key(reg_no));
+
+create table hanger
+ (hanger_id varchar(25),status varchar(25),capacity varchar(25),reg_no int,
+ foreign key(reg_no) references airplane(reg_no)
+ ,primary key(hanger_id));
+ 
+create table maintainance_record 
+(main_id varchar(25),main_date date,airplane_id varchar(25),cost varhcar(25),reg_no int
+,foreign key(reg_no)references airplane(reg_no)
+,primary key(main_id));
+
+create table personnel
+(emp_id varchar(25),name varchar(25),position varchar(25),
+primary key(emp_id));
+
+create table hanger_location
+(sector varchar(25),direction varchar(25),hanger_id varchar(25)
+,foreign key(hanger_id) references hanger(hanger_id)
+,primary key(hanger_id,sector,direction));
+                                                                  
+create table personnel_contact
+(phone_no int,mail_id varchar(25),emp_id varchar(25)
+,foreign key(emp_id) references personnel(emp_id)
+,primary key(emp_id,phone_no,mail_id));
+
+create table works
+(emp_id varchar(25),hanger_id varchar(25)
+,foreign key(emp_id) references personnel(emp_id)
+,foreign key(hanger_id) references hanger(hanger_id)
+primary key(emp_id,hanger_id));
