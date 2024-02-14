@@ -35,7 +35,7 @@ if airplane_submit_button:
 
 st.divider()
 
-col1, col2, = st.columns(2)
+col1, col2, = st.columns([3, 2])
 
 # Creating a form for the Hangar
 with st.container():
@@ -138,7 +138,7 @@ if personal_submit_button:
             conn.commit()
             st.success("Data has been successfully inserted!", icon='✅')
     except sqlite3.IntegrityError:
-        st.warning("Employee ID already exists")
+        st.warning("ERROR: Employee ID already exists")
 
 st.divider()
 
@@ -161,3 +161,75 @@ with st.form(key='Workers_In_Hangar', clear_on_submit=False):
 
     working_submit_button = st.form_submit_button(label="Enter")
 
+if working_submit_button:
+    try:
+        if not (foreign_key_empId and foreign_key_empId):
+            st.warning("Fill all the Fields.", icon='⚠️')
+        else:
+            conn.execute(f"""
+            INSERT INTO works (emp_id, hanger_id)
+            VALUES ('{foreign_key_empId}', '{foreign_key_hangarId}')
+            """)
+            conn.commit()
+            st.success("Data has been successfully inserted!", icon='✅')
+    except sqlite3.IntegrityError:
+        st.error("ERROR: Employee ID or Hangar ID already exists", icon='❌')
+
+
+with st.form(key="Workers_personnel_information", clear_on_submit=False):
+    st.header("Worker's Personnel Information", divider="rainbow")
+    phone_no = st.number_input("Enter your Phone Number *")
+    mail_id = st.text_input("Enter your Mail ID *")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT emp_id FROM personnel")
+    emp_row = cursor.fetchall()
+    emp_rows = [row['emp_id'] for row in emp_row]
+
+    employee_id = st.selectbox("Employee's ID *", emp_rows)
+
+    personnel_information = st.form_submit_button(label="Insert")
+
+if personnel_information:
+    try:
+        if not (phone_no and mail_id and employee_id):
+            st.warning("Fill all the Fields")
+        else:
+            conn.execute(f"""
+            INSERT INTO personnel_contact (phono_no, mail_id, emp_id)
+            VALUES ({phone_no}, '{mail_id}',{emp_id})
+            """)
+            conn.commit()
+            st.success("Data has been successfully inserted!", icon='✅')
+    except sqlite3.IntegrityError:
+        st.warning("ERROR: The Employee ID already exists", icon='⚠️')
+        st.error("The Employee ID already exists", icon='❌')
+
+
+with st.form(key='maintenance_record', clear_on_submit=False):
+    st.header("Maintenance Record of a Plane", divider='rainbow')
+    main_id = st.text_input("Enter the Maintenance-ID *")
+    main_date = st.date_input("Enter the date of maintenance *")
+    cost = st.number_input("Enter the total maintenance cost of the airplane *", min_value=20000)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT reg_no FROM airplane")
+    plane_reg_no = cursor.fetchall()
+    plane_reg_nos = [row['reg_no'] for row in plane_reg_no]
+
+    st.selectbox("Select the appropriate Airplane register number ", plane_reg_nos)
+
+    maintenance_submit_button = st.form_submit_button(label="Insert")
+
+if maintenance_submit_button:
+    try:
+        if not (main_id and main_date and cost and reg_no):
+            st.warning("Please fill all the fields")
+        else:
+            conn.execute(f"""
+            INSERT INTO maintainance_record (main_id, main_date, cost, reg_no)
+            VALUES ('{main_id}', '{main_date}', {cost} ,{reg_no})
+            """)
+            conn.commit()
+    except sqlite3.IntegrityError:
+        st.error("ERROR: Maintenance Record already exists")
